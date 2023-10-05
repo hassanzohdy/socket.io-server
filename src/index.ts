@@ -1,6 +1,26 @@
-import { rootPath } from "@mongez/node";
+import { SocketClients, socketClientEvents } from "app/sockets";
+import express from "express";
+import http from "http";
+import { Server } from "socket.io";
 
-// get the absolute path to the root of the project for the given path
-const root = rootPath("");
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+  },
+});
 
-console.log("Project has been started in:", root);
+const socketClients = new SocketClients();
+
+io.on("connection", socket => {
+  socketClients.add(socket);
+});
+
+server.listen(3000, () => {
+  console.log("listening on *:3000");
+});
+
+socketClientEvents.onConnect(() => {
+  console.log("client connected");
+});
